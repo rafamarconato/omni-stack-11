@@ -1,10 +1,42 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useHistory } from "react-router-dom";
 import "./style.css";
 import logoImg from "../../assets/logo.svg";
 import { FiArrowLeft } from "react-icons/fi";
+import api from "../../services/api";
 
 export default function NewIncident(){
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [value, setValue] = useState("");
+    const history = useHistory();
+
+    const ongId = localStorage.getItem("ongId");
+
+    async function handleRegisterIncident(event){
+      event.preventDefault();
+
+      const data = {
+        title,
+        description,
+        value
+      };      
+
+      try {
+        await api.post('incidents', data, {
+          headers: {
+            Authorization: ongId
+          }
+        });
+        alert('Caso cadastrado com sucesso!');
+
+        history.push('/profile');
+
+      } catch (error) {
+        alert('Erro ao realizar o cadastro do caso, tente novamente');
+      }
+    }
+
     return(
         <div className="new-incident-container">
         <div className="content">
@@ -21,10 +53,18 @@ export default function NewIncident(){
             </Link>
           </section>
   
-          <form>
-            <input placeholder="Título do caso" />
-            <textarea name="descricao" cols="30" rows="10" placeholder="Descrição"></textarea>
-            <input placeholder="Valores em reais" />
+          <form onSubmit={handleRegisterIncident}>
+            <input 
+            value={title}
+            onChange={event => setTitle(event.target.value)}
+            placeholder="Título do caso" />
+            <textarea 
+            value={description}
+            onChange={event => setDescription(event.target.value)}
+            name="descricao" cols="30" rows="10" placeholder="Descrição"></textarea>
+            <input value={value}
+            onChange={event => setValue(event.target.value)}
+            placeholder="Valores em reais" />
   
             <button className="button" type="submit">
               Cadastrar
